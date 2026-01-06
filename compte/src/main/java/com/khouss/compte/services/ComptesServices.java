@@ -32,25 +32,35 @@ public class ComptesServices {
 
     public GetCompte getCompteByNumCni(Long numCni) {
         Compte compte = compteRepository.findByNumCni(numCni)
-                .orElseThrow(() -> new RuntimeException("Compte not found"));
+                .orElseThrow(() -> new RuntimeException("Compte introuvable"));
         return compteMapper.toDto(compte);
     }
 
     public GetCompte createCompte(CreateCompte createCompte) {
+
+        if (compteRepository.existsByNumCni(createCompte.getNumCni())) {
+            throw new RuntimeException("Ce compte existe déjà (CNI déjà utilisé)");
+        }
+
+        if (compteRepository.existsByNumeroTelephone(createCompte.getNumeroTelephone())) {
+            throw new RuntimeException("Ce compte existe déjà (numéro de téléphone déjà utilisé)");
+        }
 
         CitoyenDto citoyen;
 
         try {
             citoyen = dafClient.getCitoyenByNumCni(createCompte.getNumCni());
         } catch (FeignException.NotFound e) {
-            throw new RuntimeException(
-                    "Citoyen avec CNI " + createCompte.getNumCni() + " introuvable dans le service DAF"
-            );
+            throw new RuntimeException("CNI n'existe pas");
         }
 
         Compte compte = compteMapper.toEntity(createCompte);
         Compte saved = compteRepository.save(compte);
 
         return compteMapper.toDto(saved);
+    }
+
+    public boolean compteExistsByNumeroTelephone(String numeroTelephone) {
+        return compteRepository.existsByNumeroTelephone(numeroTelephone);
     }
 }

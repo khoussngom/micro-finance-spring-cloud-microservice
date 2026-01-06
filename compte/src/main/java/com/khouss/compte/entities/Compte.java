@@ -1,14 +1,10 @@
 package com.khouss.compte.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 
 @Entity
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name="comptes",
 uniqueConstraints = {
                         @UniqueConstraint(name="num_comptes", columnNames = {"numeroTelephone"}),
@@ -28,6 +24,27 @@ public class Compte {
     @Column(nullable = false)
     private Long numCni;
     @Column(nullable = false)
-    private Double solde = 0.0;
+    private BigDecimal solde = BigDecimal.ZERO;
+
+    public Compte() {}
+
+    public Compte(String id, String numeroTelephone, Long numCni, BigDecimal solde) {
+        this.id = id;
+        this.numeroTelephone = numeroTelephone;
+        this.numCni = numCni;
+        this.solde = solde;
+    }
+
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
+    public String getNumeroTelephone() { return numeroTelephone; }
+    public void setNumeroTelephone(String numeroTelephone) { this.numeroTelephone = numeroTelephone; }
+
+    public Long getNumCni() { return numCni; }
+    public void setNumCni(Long numCni) { this.numCni = numCni; }
+
+    public BigDecimal getSolde() { return solde; }
+    public void setSolde(BigDecimal solde) { this.solde = solde; }
 
 }

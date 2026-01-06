@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/AppMicroCompte?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/AppMicroTransfert?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: marakhib
     password: Marakhib
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -9,11 +9,13 @@ spring:
       ddl-auto: update
       dialect: org.hibernate.dialect.MySQL8Dialect
     show-sql: true
+
   rabbitmq:
     host: 127.0.0.1
     port: 5672
     username: marakhib
     password: marakhib
+
   cloud:
     discovery:
       enabled: true
@@ -30,20 +32,19 @@ spring:
     stream:
       default-binder: rabbit
       bindings:
-        debit-in-0:
+        debit-out-0:
           destination: debit.command
-        credit-in-0:
+        credit-out-0:
           destination: credit.command
-        compensate-in-0:
+        compensate-out-0:
           destination: credit.compensate
-        result-out-0:
+        operationResult-in-0:
           destination: operation.result
       rabbit:
         bindings:
-          debit-in-0:
+          operationResult-in-0:
             consumer:
               autoBindDlq: true
-    function:
-      definition: debit;credit;depot;compensate
+
 server:
-  port: 8089
+  port: 8099

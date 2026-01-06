@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface CompteRepository extends JpaRepository<Compte, String> {
     Optional<Compte> findByNumeroTelephone(String numeroTelephone);
     Optional<Compte> findByNumCni(Long numCni);
+    boolean existsByNumeroTelephone(String numeroTelephone);
+    boolean existsByNumCni(Long numCni);
 }

@@ -25,4 +25,9 @@ public class CompteControllers {
     public GetCompte createCompte(@Valid @RequestBody CreateCompte compte) {
         return comptesServices.createCompte(compte);
     }
+
+    @GetMapping("/exists/{numeroTelephone}")
+    public boolean compteExists(@PathVariable String numeroTelephone) {
+        return comptesServices.compteExistsByNumeroTelephone(numeroTelephone);
+    }
 }

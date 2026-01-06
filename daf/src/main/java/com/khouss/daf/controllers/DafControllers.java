@@ -26,7 +26,7 @@ public class DafControllers {
     public ResponseEntity<CitoyenDto> getCitoyenByNumCni(@PathVariable Long numCni) {
         CitoyenDto citoyen = citoyenService.findByNumCni(numCni);
         if (citoyen == null) {
-            return ResponseEntity.notFound().build();
+            throw new RuntimeException("Citoyen introuvable");
         }
         return ResponseEntity.ok(citoyen);
     }
