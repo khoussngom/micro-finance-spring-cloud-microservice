@@ -1,0 +1,64 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: gatewayServer
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: daf-service
+          uri: lb://daf
+          predicates:
+            - Path=/daf/**
+          filters:
+            - StripPrefix=1
+          order: 10
+        - id: citoyens-via-daf
+          uri: lb://daf
+          predicates:
+            - Path=/citoyens/**
+          order: 5
+        - id: citoyens-direct
+          uri: http://daf:8085
+          predicates:
+            - Path=/citoyens/**
+          order: 0
+        - id: compte-service
+          uri: lb://compte
+          predicates:
+            - Path=/comptes/**
+          order: 10
+        - id: transfert-service
+          uri: lb://transfert
+          predicates:
+            - Path=/transferts/**
+          order: 10
+    config:
+      enabled: false
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eurekaserver:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+  packages-to-scan: com.khouss.gatewayServer.config

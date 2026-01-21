@@ -1,0 +1,100 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: Marakhib
+      MYSQL_USER: marakhib
+      MYSQL_PASSWORD: Marakhib
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: marakhib
+      RABBITMQ_DEFAULT_PASS: marakhib
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - app-network
+
+  configserver:
+    build: ./configServer
+    ports:
+      - "8889:8889"
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  eurekaserver:
+    build: ./eurekaserver
+    ports:
+      - "8761:8761"
+    depends_on:
+      - configserver
+    networks:
+      - app-network
+
+  compte:
+    build: ./compte
+    ports:
+      - "8089:8089"
+    depends_on:
+      - mysql
+      - rabbitmq
+      - eurekaserver
+      - configserver
+    networks:
+      - app-network
+
+  daf:
+    build: ./daf
+    ports:
+      - "8085:8085"
+    depends_on:
+      - mysql
+      - eurekaserver
+      - configserver
+    networks:
+      - app-network
+
+  transfert:
+    build: ./transfert
+    ports:
+      - "8099:8099"
+    depends_on:
+      - mysql
+      - rabbitmq
+      - eurekaserver
+      - configserver
+    networks:
+      - app-network
+
+  gatewayserver:
+    build: ./gatewayServer
+    ports:
+      - "8888:8888"
+    depends_on:
+      - eurekaserver
+      - configserver
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+  rabbitmq_data:
+
+networks:
+  app-network:
+    driver: bridge

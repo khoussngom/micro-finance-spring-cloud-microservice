@@ -17,62 +17,62 @@ import java.util.function.Consumer;
 
 @Configuration
 public class DepotListener  {
-    private final ProcessedOperationRepository processedRepo;
-    private final CompteRepository comptesRepository;
-    private final StreamBridge streamBridge;
+        private final ProcessedOperationRepository processedRepo;
+        private final CompteRepository comptesRepository;
+        private final StreamBridge streamBridge;
 
-    public DepotListener(ProcessedOperationRepository processedRepo, CompteRepository comptesRepository, StreamBridge streamBridge) {
-        this.processedRepo = processedRepo;
-        this.comptesRepository = comptesRepository;
-        this.streamBridge = streamBridge;
-    }
-
-
-    @Bean
-    public Consumer<DepotEvent> depot(){
-        return event ->
-        {
-            String key  = event.getTransferId() + "_DEPOT";
-            if (processedRepo.existsById(key)) return;
-
-            Compte compte = comptesRepository.findByNumeroTelephone(event.getCompteId()).orElseThrow(
-                    ()-> new RuntimeException("Compte not found"));
-
-            compte.setSolde(compte.getSolde().add(event.getMontant()));
-            comptesRepository.save(compte);
-            processedRepo.save(new ProcessedOperation(key));
-            streamBridge.send("result-out-0",
-                    new OperationResultEvent(event.getTransferId(),
-                            "DEPOT", "SUCCESS", null));
+        public DepotListener(ProcessedOperationRepository processedRepo, CompteRepository comptesRepository, StreamBridge streamBridge) {
+                this.processedRepo = processedRepo;
+                this.comptesRepository = comptesRepository;
+                this.streamBridge = streamBridge;
+        }
 
 
+        @Bean
+        public Consumer<DepotEvent> depot(){
+                return event ->
+                {
+                String key  = event.getTransferId() + "_DEPOT";
+                if (processedRepo.existsById(key)) return;
 
+                Compte compte = comptesRepository.findByNumeroTelephone(event.getCompteId()).orElseThrow(
+                        ()-> new RuntimeException("Compte not found"));
 
-
-        };
-   }
-
-    @Bean
-    public Consumer<CreditEvent> credit(){
-        return event ->
-        {
-            String key  = event.getTransferId() + "_CREDIT";
-            if (processedRepo.existsById(key)) return;
-
-            Compte compte = comptesRepository.findByNumeroTelephone(event.getCompteId()).orElseThrow(
-                    ()-> new RuntimeException("Compte not found"));
-
-            compte.setSolde(compte.getSolde().add(event.getMontant()));
-            comptesRepository.save(compte);
-            processedRepo.save(new ProcessedOperation(key));
-            streamBridge.send("result-out-0",
-                    new OperationResultEvent(event.getTransferId(),
-                            "CREDIT", "SUCCESS", null));
+                compte.setSolde(compte.getSolde().add(event.getMontant()));
+                comptesRepository.save(compte);
+                processedRepo.save(new ProcessedOperation(key));
+                streamBridge.send("result-out-0",
+                        new OperationResultEvent(event.getTransferId(),
+                                "DEPOT", "SUCCESS", null));
 
 
 
 
 
-        };
-   }
+                };
+        }
+
+        @Bean
+        public Consumer<CreditEvent> credit(){
+                return event ->
+                {
+                String key  = event.getTransferId() + "_CREDIT";
+                if (processedRepo.existsById(key)) return;
+
+                Compte compte = comptesRepository.findByNumeroTelephone(event.getCompteId()).orElseThrow(
+                        ()-> new RuntimeException("Compte not found"));
+
+                compte.setSolde(compte.getSolde().add(event.getMontant()));
+                comptesRepository.save(compte);
+                processedRepo.save(new ProcessedOperation(key));
+                streamBridge.send("result-out-0",
+                        new OperationResultEvent(event.getTransferId(),
+                                "CREDIT", "SUCCESS", null));
+
+
+
+
+
+                };
+        }
 }

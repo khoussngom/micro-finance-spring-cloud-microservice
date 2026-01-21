@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: transfert
+
+  config:
+    import: "configserver:http://localhost:8889"
