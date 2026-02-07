@@ -7,22 +7,20 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-      org:
-        hibernate:
-          dialect: org.hibernate.dialect.MySQL8Dialect
     show-sql: true
   cloud:
     discovery:
       enabled: true
-    eureka:
-      client:
-        service-url:
-          defaultZone: http://eurekaserver:8761/eureka/
-        register-with-eureka: true
-        fetch-registry: true
-      instance:
-        prefer-ip-address: true
-        lease-renewal-interval-in-seconds: 10
-        lease-expiration-duration-in-seconds: 30
 server:
   port: 8085
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eurekaserver:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30

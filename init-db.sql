@@ -2,3 +2,10 @@ CREATE DATABASE IF NOT EXISTS AppMicroCompte;
 CREATE DATABASE IF NOT EXISTS dafMicro;
 CREATE DATABASE IF NOT EXISTS AppMicroTransfert;
 CREATE DATABASE IF NOT EXISTS appMicroDb;
+
+CREATE USER IF NOT EXISTS 'marakhib'@'%' IDENTIFIED BY 'Marakhib';
+GRANT ALL PRIVILEGES ON AppMicroCompte.* TO 'marakhib'@'%';
+GRANT ALL PRIVILEGES ON dafMicro.* TO 'marakhib'@'%';
+GRANT ALL PRIVILEGES ON AppMicroTransfert.* TO 'marakhib'@'%';
+GRANT ALL PRIVILEGES ON appMicroDb.* TO 'marakhib'@'%';
+FLUSH PRIVILEGES;

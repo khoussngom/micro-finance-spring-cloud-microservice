@@ -3,12 +3,13 @@ version: "3.9"
 services:
   mysql:
     image: mysql:8.0
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: Marakhib
       MYSQL_USER: marakhib
       MYSQL_PASSWORD: Marakhib
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
@@ -17,6 +18,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
+    restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: marakhib
       RABBITMQ_DEFAULT_PASS: marakhib
@@ -30,6 +32,7 @@ services:
 
   configserver:
     build: ./configServer
+    restart: on-failure
     ports:
       - "8889:8889"
     depends_on:
@@ -39,15 +42,19 @@ services:
 
   eurekaserver:
     build: ./eurekaserver
+    restart: on-failure
     ports:
       - "8761:8761"
     depends_on:
       - configserver
+    environment:
+      CONFIG_SERVER_URL: http://configserver:8889
     networks:
       - app-network
 
   compte:
     build: ./compte
+    restart: on-failure
     ports:
       - "8089:8089"
     depends_on:
@@ -55,22 +62,28 @@ services:
       - rabbitmq
       - eurekaserver
       - configserver
+    environment:
+      CONFIG_SERVER_URL: http://configserver:8889
     networks:
       - app-network
 
   daf:
     build: ./daf
+    restart: on-failure
     ports:
       - "8085:8085"
     depends_on:
       - mysql
       - eurekaserver
       - configserver
+    environment:
+      CONFIG_SERVER_URL: http://configserver:8889
     networks:
       - app-network
 
   transfert:
     build: ./transfert
+    restart: on-failure
     ports:
       - "8099:8099"
     depends_on:
@@ -78,11 +91,14 @@ services:
       - rabbitmq
       - eurekaserver
       - configserver
+    environment:
+      CONFIG_SERVER_URL: http://configserver:8889
     networks:
       - app-network
 
   gatewayserver:
     build: ./gatewayServer
+    restart: on-failure
     ports:
       - "8888:8888"
     depends_on:

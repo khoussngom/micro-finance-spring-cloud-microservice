@@ -9,5 +9,6 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /app/target/configServer-0.0.1-SNAPSHOT.jar configServer.jar
+COPY config-repo ./config-repo
 EXPOSE 8889
 ENTRYPOINT ["java", "-jar", "configServer.jar"]
