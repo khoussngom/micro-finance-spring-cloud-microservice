@@ -1,5 +1,25 @@
 spring:
   application:
     name: eureka-server
-  config:
-    import: "configserver:${CONFIG_SERVER_URL:http://localhost:8889}"
+  cloud:
+    config:
+      enabled: false
+
+eureka:
+  server:
+    enable-self-preservation: false
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+server:
+    port: 8761

@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Configuration
-public class CompteSeederConfig {
+public class  CompteSeederConfig {
 
     @Bean
     CommandLineRunner compteSeeder(CompteRepository compteRepository) {

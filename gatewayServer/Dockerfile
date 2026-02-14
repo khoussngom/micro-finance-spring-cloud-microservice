@@ -6,8 +6,10 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
+RUN apk add --no-cache curl
 COPY --from=build /app/target/gatewayServer-0.0.1-SNAPSHOT.jar gatewayServer.jar
 EXPOSE 8888
-ENTRYPOINT ["java", "-jar", "gatewayServer.jar"]
+ENV JAVA_OPTS="-Xmx256m -Xms128m"
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar gatewayServer.jar"]

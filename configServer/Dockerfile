@@ -6,9 +6,11 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
+RUN apk add --no-cache curl
 COPY --from=build /app/target/configServer-0.0.1-SNAPSHOT.jar configServer.jar
 COPY config-repo ./config-repo
 EXPOSE 8889
-ENTRYPOINT ["java", "-jar", "configServer.jar"]
+ENV JAVA_OPTS="-Xmx256m -Xms128m"
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar configServer.jar"]

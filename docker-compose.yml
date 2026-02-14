@@ -15,13 +15,25 @@ services:
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    command: --innodb-buffer-pool-size=512M --innodb-log-file-size=128M --max-connections=50
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3-management-alpine
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: marakhib
-      RABBITMQ_DEFAULT_PASS: marakhib
+      RABBITMQ_DEFAULT_PASS: Marakhib
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -29,83 +41,188 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   configserver:
-    build: ./configServer
-    restart: on-failure
+    image: khoussngom/appmicro-configserver:latest
+    restart: unless-stopped
     ports:
       - "8889:8889"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - app-network
+    environment:
+      - JAVA_OPTS=-Xmx256m -Xms128m
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8889/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   eurekaserver:
-    build: ./eurekaserver
-    restart: on-failure
+    image: khoussngom/appmicro-eurekaserver:latest
+    restart: unless-stopped
     ports:
       - "8761:8761"
     depends_on:
-      - configserver
-    environment:
-      CONFIG_SERVER_URL: http://configserver:8889
+      configserver:
+        condition: service_healthy
     networks:
       - app-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - JAVA_OPTS=-Xmx256m -Xms128m
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   compte:
-    build: ./compte
-    restart: on-failure
+    image: khoussngom/appmicro-compte:latest
+    restart: unless-stopped
     ports:
       - "8089:8089"
     depends_on:
-      - mysql
-      - rabbitmq
-      - eurekaserver
-      - configserver
-    environment:
-      CONFIG_SERVER_URL: http://configserver:8889
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
     networks:
       - app-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_CONFIG_IMPORT=configserver:http://configserver:8889
+      - JAVA_OPTS=-Xmx256m -Xms128m
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8089/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   daf:
-    build: ./daf
-    restart: on-failure
+    image: khoussngom/appmicro-daf:latest
+    restart: unless-stopped
     ports:
       - "8085:8085"
     depends_on:
-      - mysql
-      - eurekaserver
-      - configserver
-    environment:
-      CONFIG_SERVER_URL: http://configserver:8889
+      mysql:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
     networks:
       - app-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_CONFIG_IMPORT=configserver:http://configserver:8889
+      - JAVA_OPTS=-Xmx256m -Xms128m
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   transfert:
-    build: ./transfert
-    restart: on-failure
+    image: khoussngom/appmicro-transfert:latest
+    restart: unless-stopped
     ports:
       - "8099:8099"
     depends_on:
-      - mysql
-      - rabbitmq
-      - eurekaserver
-      - configserver
-    environment:
-      CONFIG_SERVER_URL: http://configserver:8889
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
     networks:
       - app-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_CONFIG_IMPORT=configserver:http://configserver:8889
+      - JAVA_OPTS=-Xmx256m -Xms128m
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8099/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   gatewayserver:
-    build: ./gatewayServer
-    restart: on-failure
+    image: khoussngom/appmicro-gatewayserver:latest
+    restart: unless-stopped
     ports:
       - "8888:8888"
     depends_on:
-      - eurekaserver
-      - configserver
+      eurekaserver:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
     networks:
       - app-network
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://configserver:8889
+      - JAVA_OPTS=-Xmx256m -Xms128m
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
   mysql_data:
@@ -114,3 +231,4 @@ volumes:
 networks:
   app-network:
     driver: bridge
+

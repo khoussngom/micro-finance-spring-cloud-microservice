@@ -1,6 +1,57 @@
 spring:
   application:
     name: compte
-
   config:
-    import: "configserver:${CONFIG_SERVER_URL:http://localhost:8889}"
+    import: "configserver:${CONFIG_SERVER_URL:http://configserver:8889}"
+  datasource:
+    url: jdbc:mysql://mysql:3306/AppMicroCompte?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: marakhib
+    password: Marakhib
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: marakhib
+    password: Marakhib
+  cloud:
+    discovery:
+      enabled: true
+    stream:
+      default-binder: rabbit
+
+server:
+  port: 8089
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eurekaserver:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+    region: default
+    availability-zones:
+      default: default
+  instance:
+    hostname: ${HOSTNAME:compte}
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html

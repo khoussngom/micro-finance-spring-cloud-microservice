@@ -12,7 +12,7 @@ spring:
     host: rabbitmq
     port: 5672
     username: marakhib
-    password: marakhib
+    password: Marakhib
   cloud:
     discovery:
       enabled: true
@@ -36,6 +36,20 @@ spring:
       definition: debit;credit;depot;compensate
 server:
   port: 8089
+  address: 0.0.0.0
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+  health:
+    defaults:
+      enabled: true
 
 eureka:
   client:

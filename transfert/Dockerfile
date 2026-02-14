@@ -6,8 +6,10 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
+RUN apk add --no-cache curl
 COPY --from=build /app/target/transfert-0.0.1-SNAPSHOT.jar transfert.jar
 EXPOSE 8099
-ENTRYPOINT ["java", "-jar", "transfert.jar"]
+ENV JAVA_OPTS="-Xmx256m -Xms128m"
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar transfert.jar"]

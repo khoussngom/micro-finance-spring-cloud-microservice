@@ -5,8 +5,6 @@ server:
 spring:
   application:
     name: gatewayServer
-  config:
-    import: optional:configserver:http://configserver:8889
 
   cloud:
     gateway:
@@ -20,16 +18,23 @@ spring:
           uri: lb://daf
           predicates:
             - Path=/citoyens/**,/daf/**
+          filters:
+            - RewritePath=/citoyens(?<segment>.*) /$\{segment}
+            - RewritePath=/daf(?<segment>.*) /$\{segment}
         # Compte Service
         - id: compte-service
           uri: lb://compte
           predicates:
             - Path=/comptes/**
+          filters:
+            - RewritePath=/comptes(?<segment>.*) /$\{segment}
         # Transfert Service
         - id: transfert-service
           uri: lb://transfert
           predicates:
             - Path=/transferts/**
+          filters:
+            - RewritePath=/transferts(?<segment>.*) /$\{segment}
 
 eureka:
   client:
@@ -37,12 +42,6 @@ eureka:
       defaultZone: http://eurekaserver:8761/eureka/
     fetch-registry: true
     register-with-eureka: true
-    region: default
-    availability-zones:
-      default: default
-  instance:
-    hostname: ${HOSTNAME:gatewayServer}
-    prefer-ip-address: true
 
 management:
   endpoints:
@@ -53,19 +52,9 @@ management:
 springdoc:
   api-docs:
     enabled: true
-    path: /v3/api-docs
   swagger-ui:
     enabled: true
-    path: /swagger-ui.html
     urls:
-      - name: API Gateway
-        url: /v3/api-docs
-      - name: DAF Service
-        url: /daf/v3/api-docs
-      - name: Compte Service
-        url: /compte/v3/api-docs
-      - name: Transfert Service
-        url: /transfert/v3/api-docs
-  show-actuator: true
-  default-consumes-media-type: application/json
-  default-produces-media-type: application/json
+      - name: API
+        url: https://apimicroservice.marakhib-global.com/v3/api-docs
+  packages-to-scan: com.khouss.gatewayServer.config
